@@ -1,4 +1,4 @@
-const routerMiddlewares = [];
+const routerMiddlewares = {};
 
 function resolveComponents(components) {
     return Promise.all(components.map(component => {
@@ -22,96 +22,128 @@ function getMiddlewares(components) {
     return middlewares;
 }
 
-function callMiddlewares(middlewares, to, from, next) {
-    const _next = (...args) => {
-        // stop if "_next" was called with an argument or the stack is empty
-        if (args.length > 0 || middlewares.length === 0) {
-            // TODO add onLoadingFinished
+function parseMiddleware(middleware) {
+    if (typeof middleware === 'function') {
+        return {middleware};
+    }
 
-            return next(...args);
-        }
+    middleware = middleware.toString(); // force to string
+    let [name, params] = middleware.split(':'); // like auth:xyz
+    if (typeof params === 'string') {
+        params = params.split(',');
+    }
 
-        const {middleware, params} = parseMiddleware(middlewares.shift());
-
-        if (typeof middleware === 'function') {
-            middleware(to, from, _next, params);
-        } else if (routeMiddlewares[middleware]) {
-            routeMiddlewares[middleware](to, from, _next, params);
-        } else {
-            throw Error('Undefined middleware ' + middleware);
-        }
+    return {
+        middleware: name,
+        params
     };
-
-    _next();
 }
 
-function resolveMiddlewares(requireContext) {
-    return requireContext
-        .keys()
-        .map(file =>
-            [file.replace(/(^.\/)|(\.js$)/g, ''), requireContext(file)],
-        )
-        .reduce((guards, [name, guard]) => {
-            return {...guards, [name]: guard.default};
-        }, {});
-}
-
-function install(Vue, config) {
-    const router = config.router;
-    const globalMiddlewares = config.globalMiddlewares || [];
-    const onLoading = config.onLoading ||null;
-
-    router.beforeEach(async (to, from, next) => {
-        let components = [];
-
-        try {
-            // get matched components and resolve them
-            components = await resolveComponents(router.getMatchedComponents(to));
-        } catch (error) {
-            if (/^Loading( CSS)? chunk (\d)+ failed\./.test(error.message)) {
-                window.location.reload(true);
-                return;
-            }
-        }
-
-        if (components.length === 0) {
-            return next();
-        }
-
-        let loading = Promise.resolve();
-        if (typeof onLoading === 'function') {
-            let loader = onLoading();
-            if (loader instanceof Promise) {
-                loading = loader;
-            }
-        }
-
-        loading
-            .then(() => {
-                callMiddlewares([
-                    ...globalMiddlewares,
-                    getMiddlewares(components)
-                ], to, from, next);
-            })
-            .catch(() => {
-                next(false);
-            });
-    });
+function addMiddleware(name, middleware) {
+    routerMiddlewares[name] = middleware;
 }
 
 function addMiddlewares(middlewares) {
-    if (Array.isArray(middlewares)) {
-        routerMiddlewares.push(...middlewares);
-    } else {
-        routerMiddlewares.push(middlewares);
+    if (typeof middlewares !== 'object' || middlewares === null) {
+        return;
+    }
+
+    for (let key of Object.keys(middlewares)) {
+        routerMiddlewares[key] = middlewares[key];
     }
 }
 
-const Plugin = {install};
+function addMiddlewaresContext(requireContext) {
+    addMiddlewares(
+        requireContext
+            .keys()
+            .map(file =>
+                [file.replace(/(^.\/)|(\.(js|ts)$)/g, ''), requireContext(file)],
+            )
+            .reduce((guards, [name, guard]) => {
+                return {...guards, [name]: guard.default};
+            }, {})
+    );
+}
+
+function getPromise(method) {
+    if (typeof method !== 'function') {
+        return Promise.resolve();
+    }
+
+    let promise = method();
+    if (promise instanceof Promise) {
+        return promise;
+    }
+    return Promise.resolve();
+}
+
+const Plugin = {
+    install(Vue, config) {
+        const router = config.router;
+        const globalMiddlewares = config.globalMiddlewares || [];
+        const beforeLoading = config.beforeLoading || null;
+        const afterLoading = config.afterLoading || null;
+
+        function callMiddlewares(middlewares, to, from, next, components) {
+            const _next = (...args) => {
+                // stop if "_next" was called with an argument or the stack is empty
+                if (args.length > 0 || middlewares.length === 0) {
+                    getPromise(afterLoading)
+                        .then(() => {
+                            next(...args);
+                        })
+
+                    return;
+                }
+
+                const {middleware, params} = parseMiddleware(middlewares.shift());
+
+                if (typeof middleware === 'function') {
+                    middleware(to, from, _next, params, components);
+                } else if (routerMiddlewares[middleware]) {
+                    routerMiddlewares[middleware](to, from, _next, params, components);
+                } else {
+                    throw Error('Undefined middleware ' + middleware);
+                }
+            };
+
+            _next();
+        }
+
+        router.beforeEach(async (to, from, next) => {
+            let components = [];
+
+            try {
+                // get matched components and resolve them
+                components = await resolveComponents(router.getMatchedComponents(to));
+            } catch (error) {
+                if (/^Loading( CSS)? chunk (\d)+ failed\./.test(error.message)) {
+                    window.location.reload(true);
+                    return;
+                }
+            }
+
+            // no components found
+            if (components.length === 0) {
+                return next();
+            }
+
+            getPromise(beforeLoading)
+                .then(() => {
+                    callMiddlewares([
+                        ...globalMiddlewares,
+                        ...getMiddlewares(components)
+                    ], to, from, next, components);
+                });
+        });
+    }
+};
 
 export {
-    install,
-    addMiddlewares,
-    resolveMiddlewares,
     Plugin as default,
+    addMiddleware,
+    addMiddlewares,
+    addMiddlewaresContext,
+    routerMiddlewares,
 }
