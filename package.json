@@ -1,0 +1,38 @@
+{
+  "name": "@derpierre65/vue-router-middlewares",
+  "version": "0.1.0",
+  "description": "Basic Middleware functionality for vue-router",
+  "author": "derpierre65 <git@derpierre65.de>",
+  "private": false,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js --progress"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/derpierre65/vue-router-middlewares.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/derpierre65/vue-router-middlewares/issues"
+  },
+  "homepage": "https://github.com/derpierre65/vue-router-middlewares#readme",
+  "keywords": [
+    "vue",
+    "vuejs",
+    "router",
+    "middleware"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.14.2",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
+    "@babel/preset-env": "^7.14.2",
+    "babel-loader": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "webpack": "^5.37.0",
+    "webpack-cli": "^4.7.0"
+  }
+}
