@@ -50,6 +50,12 @@ import {addMiddlewaresContext} from 'vue-router-middlewares';
 addMiddlewaresContext(
 	require.context('./middlewares', false, /.*\.(js|ts)$/),
 );
+
+// middlewares/test.js
+export default function(to, from, next, params, components) {
+    // do middleware stuff
+    next();
+};
 ```
 
 ### Add Middleware(s)
@@ -71,13 +77,20 @@ addMiddlewares({
 
 ### Use Middlewares
 
-```js
-// view component
+```vue
+<template>
+  <div>
+    my route view component
+  </div>
+</template>
+
+<script>
 export default {
     name: 'ViewName',
     // middleware: 'my-middleware', // single middleware
     middleware: ['my-middleware', 'my-another-middleware'], // multiple middlewares
-}
+};
+</script>
 ```
 
 ## Examples
@@ -106,11 +119,22 @@ export default function (to, from, next, params, components) {
 
     next();
 }
+```
 
-// view component
+The view component:
+
+```vue
+<template>
+  <div>
+    my route view component
+  </div>
+</template>
+
+<script>
 export default {
     name: 'ViewName',
-    // auth: false, // ignore the middleware
+    // auth: false, // ignore the auth middleware
     auth: 'guest', // only guests can view this middleware
-}
+};
+</script>
 ```
