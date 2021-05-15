@@ -17,3 +17,8 @@ jobs:
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: Assets
+          path: ./dist

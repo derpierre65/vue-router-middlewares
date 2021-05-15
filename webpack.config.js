@@ -12,8 +12,8 @@ module.exports = {
         filename: 'index.js',
         library: {
             umdNamedDefine: true,
-            // name: 'vue-router-middlewares',
-            type: 'module',
+            name: 'VueRouterMiddleware',
+            type: 'commonjs',
         }
     },
     module: {

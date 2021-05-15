@@ -1,11 +1,12 @@
 {
   "name": "@derpierre65/vue-router-middlewares",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Basic Middleware functionality for vue-router",
   "author": "derpierre65 <git@derpierre65.de>",
   "private": false,
   "main": "dist/index.js",
   "scripts": {
+    "prepare": "npm run build",
     "build": "cross-env NODE_ENV=production webpack --config webpack.config.js --progress"
   },
   "publishConfig": {
