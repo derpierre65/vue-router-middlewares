@@ -134,7 +134,7 @@ The view component:
 export default {
     name: 'ViewName',
     // auth: false, // ignore the auth middleware
-    auth: 'guest', // only guests can view this middleware
+    auth: 'guest', // only guests can view this view
 };
 </script>
 ```
