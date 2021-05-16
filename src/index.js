@@ -79,12 +79,7 @@ function getPromise(method) {
 }
 
 const Plugin = {
-    install(Vue, config) {
-        const router = config.router;
-        const globalMiddlewares = config.globalMiddlewares || [];
-        const beforeLoading = config.beforeLoading || null;
-        const afterLoading = config.afterLoading || null;
-
+    install(Vue, {router, globalMiddlewares = [], beforeLoading, afterLoading}) {
         function callMiddlewares(middlewares, to, from, next, components) {
             const _next = (...args) => {
                 // stop if "_next" was called with an argument or the stack is empty
@@ -138,7 +133,7 @@ const Plugin = {
                 });
         });
     }
-};
+}
 
 export {
     Plugin as default,
