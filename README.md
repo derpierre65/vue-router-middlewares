@@ -16,7 +16,7 @@ npm install --save @derpierre65/vue-router-middlewares
 
 ```js
 import Router from 'vue-router';
-import RouterMiddlewares from 'vue-router-middlewares';
+import RouterMiddlewares from '@derpierre65/vue-router-middlewares';
 
 Vue.use(Router);
 const router = new Router({ ... });
@@ -44,7 +44,7 @@ Vue.use(RouterMiddlewares, {
 ### Add Middlewares with `require.context`
 
 ```js
-import {addMiddlewaresContext} from 'vue-router-middlewares';
+import {addMiddlewaresContext} from '@derpierre65/vue-router-middlewares';
 
 // import all from middlewares directory
 addMiddlewaresContext(
@@ -61,7 +61,7 @@ export default function(to, from, next, params, components) {
 ### Add Middleware(s)
 
 ```js
-import {addMiddleware, addMiddlewares} from 'vue-router-middlewares';
+import {addMiddleware, addMiddlewares} from '@derpierre65/vue-router-middlewares';
 
 // single middleware
 addMiddleware('my-middleware', function(to, from, next, params, components) {
