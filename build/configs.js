@@ -1,12 +1,9 @@
 const path = require('path')
 const buble = require('rollup-plugin-buble')
-const babel = require('rollup-plugin-babel');
-const flow = require('rollup-plugin-flow-no-whitespace')
-const cjs = require('@rollup/plugin-commonjs')
-const node = require('@rollup/plugin-node-resolve').nodeResolve
+const babel = require('@rollup/plugin-babel').babel;
+const commonjs = require('@rollup/plugin-commonjs')
+const nodeResolve = require('@rollup/plugin-node-resolve').nodeResolve
 const replace = require('rollup-plugin-replace')
-const version = process.env.VERSION || require('../package.json').version
-
 const resolve = _path => path.resolve(__dirname, '../', _path)
 
 module.exports = [
@@ -19,7 +16,7 @@ module.exports = [
     {
         file: resolve('dist/vue-router-middlewares.min.js'),
         format: 'umd',
-        env: 'production'
+        env: 'production',
     },
     {
         file: resolve('dist/vue-router-middlewares.common.js'),
@@ -48,15 +45,12 @@ function genConfig(opts) {
         input: {
             input: resolve('src/index.js'),
             plugins: [
-                flow(),
-                node(),
                 babel({
-                    exclude: 'node_modules/**' // only transpile our source code
+                    exclude: 'node_modules/**', // only transpile our source code
+                    babelHelpers: 'runtime',
                 }),
-                cjs(),
-                replace({
-                    __VERSION__: version
-                })
+                nodeResolve(),
+                commonjs(),
             ]
         },
         output: {
