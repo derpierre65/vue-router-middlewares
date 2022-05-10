@@ -10,7 +10,7 @@ function getMiddlewares(components) {
     const middlewares = [];
 
     components
-        .filter(component => component.middleware)
+        .filter(component => component && component.middleware)
         .forEach(component => {
             if (Array.isArray(component.middleware)) {
                 middlewares.push(...component.middleware);
