@@ -1,6 +1,6 @@
 {
   "name": "@derpierre65/vue-router-middlewares",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Basic Middleware functionality for vue-router",
   "author": "derpierre65 <git@derpierre65.de>",
   "private": false,
