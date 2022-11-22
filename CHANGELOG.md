@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2022-11-22
+### Added
+- Support for vue 3 (middleware will now be defined in the router configuration).
+
 ## [1.0.6] - 2022-05-28
 ### Fixed
 - If the `default` export for function components is available then use the `default` export as value.

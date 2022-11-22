@@ -52,10 +52,13 @@ addMiddlewaresContext(
 );
 
 // middlewares/test.js
-export default function(to, from, next, params, components) {
+export default function(to, from, params, components) {
     // do middleware stuff
-    next();
-};
+    return;
+    // return false; // to stop navigation
+    // return '/hello'; // redirect to /hello
+    // return {name: 'hello'}; // redirect to route with name hello
+}
 ```
 
 ### Add Middleware(s)
@@ -64,33 +67,32 @@ export default function(to, from, next, params, components) {
 import {addMiddleware, addMiddlewares} from '@derpierre65/vue-router-middlewares';
 
 // single middleware
-addMiddleware('my-middleware', function(to, from, next, params, components) {
-    next();
+addMiddleware('my-middleware', async function(to, from, params) {
+    return;
 });
 
 // multiple middlewares
 addMiddlewares({
-    'my-middleware': (to, from, next, params, components) => next(),
-    'my-another-middleware': (to, from, next, params, components) => next(),
+    'my-middleware': (to, from, params) => true,
+    'my-another-middleware': (to, from, params) => true,
 });
 ```
 
-### Use Middlewares
+### Use Middlewares in your router configuration
 
-```vue
-<template>
-  <div>
-    my route view component
-  </div>
-</template>
+```js
+const routes = [
+  {
+    path: '/',
+    component: () => import('pages/MyComponent.vue'),
+    meta: {
+      middleware: ['my-middleware', 'my-another-middleware'],
+      auth: true,
+    },
+  },
+];
 
-<script>
-export default {
-    name: 'ViewName',
-    // middleware: 'my-middleware', // single middleware
-    middleware: ['my-middleware', 'my-another-middleware'], // multiple middlewares
-};
-</script>
+export default routes;
 ```
 
 ## Examples
@@ -105,36 +107,31 @@ Vue.use(RouterMiddlewares, {
 });
 
 // middlewares/auth.js
-export default function (to, from, next, params, components) {
+export default function (to, from, params) {
 	let isLoggedIn = false; // your logged in check method
-    for (let component of components) {
-        if (component.auth === false) {
-            continue;
-        }
-
-        if (component.auth === 'guest' && isLoggedIn || component.auth !== 'guest' && !isLoggedIn) {
-            return next({ name: 'index' });
-        }
+    if (to.meta.auth === false) {
+        return;
     }
 
-    next();
+    if (to.meta.auth === 'guest' && isLoggedIn || to.meta.auth !== 'guest' && !isLoggedIn) {
+        return { name: 'index' };
+    }
 }
 ```
 
-The view component:
+The router configuration:
 
-```vue
-<template>
-  <div>
-    my route view component
-  </div>
-</template>
+```js
+const routes = [
+  {
+    path: '/',
+    component: () => import('pages/MyComponent.vue'),
+    meta: {
+      middleware: ['auth'],
+      auth: true,
+    },
+  },
+];
 
-<script>
-export default {
-    name: 'ViewName',
-    // auth: false, // ignore the auth middleware
-    auth: 'guest', // only guests can view this view
-};
-</script>
+export default routes;
 ```
